@@ -1,0 +1,8 @@
+on init
+    symlink /dev/block/platform/soc.0/f9824900.sdhci /dev/block/bootdevice
+
+# The kernel defaults to the performance governor, which holds every core at
+# maximum frequency in recovery.
+on boot
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor interactive
+    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor interactive
