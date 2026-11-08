@@ -35,8 +35,8 @@ if [ ! -f "$HELPER" ]; then
 fi
 . "$HELPER"
 
-if [ $# -gt 3 ]; then
-    echo "usage: $0 [PATH_TO_EXPANDED_ROM] [PATH_TO_QC_BLOBS] [PATH_TO_BULLHEAD_BLOBS]"
+if [ $# -gt 4 ]; then
+    echo "usage: $0 [PATH_TO_EXPANDED_ROM] [PATH_TO_QC_BLOBS] [PATH_TO_BULLHEAD_BLOBS] [PATH_TO_LIBRA_BLOBS]"
     echo ""
     echo "PATH_TO_EXPANDED_ROM defaults to adb. PATH_TO_QC_BLOBS defaults to the"
     echo "extracted LG G4 blobs in vendor/lge/g4-common/proprietary."
@@ -46,6 +46,7 @@ fi
 SRC="${1:-adb}"
 SRC_QC="${2:-$CM_ROOT/vendor/lge/g4-common/proprietary}"
 SRC_BULLHEAD="${3:-$CM_ROOT/vendor/lge/bullhead/proprietary}"
+SRC_LIBRA="${4:-$CM_ROOT/vendor/xioami/libra/libra/proprietary}"
 
 setup_vendor "$DEVICE" "$VENDOR" "$CM_ROOT"
 
@@ -61,7 +62,8 @@ extract_qc() {
 }
 
 extract "$MY_DIR"/proprietary-files.txt "$SRC"
-extract_qc "bullhead" "$SRC_QC" invert
+extract_qc "bullhead|libra" "$SRC_QC" invert
 extract_qc "bullhead" "$SRC_BULLHEAD"
+extract_qc "libra" "$SRC_LIBRA"
 
 "$MY_DIR"/setup-makefiles.sh
