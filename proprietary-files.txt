@@ -1,7 +1,5 @@
 # Proprietary blobs extracted from stock IM-A000S (ef78s) LRX22G S0227005
 
-# Adreno / Graphics
-
 # Audio
 etc/acdbdata/MTP/MTP_Bluetooth_cal.acdb
 etc/acdbdata/MTP/MTP_General_cal.acdb
@@ -368,9 +366,7 @@ bin/ATFWD-daemon
 bin/adsprpcd
 bin/cnd
 bin/energy-awareness
-bin/irsc_util
 bin/msm_irqbalance
-bin/qmuxd
 bin/radish
 bin/ssr_diag
 lib/hw/wbc_hal.default.so
@@ -400,7 +396,6 @@ vendor/lib/libadiertac.so
 vendor/lib/libadsprpc.so
 vendor/lib/libalarmservice_jni.so
 vendor/lib/libaudcal.so
-vendor/lib/libconfigdb.so
 vendor/lib/libextendedremotedisplay.so
 vendor/lib/libfastcvadsp_stub.so
 vendor/lib/libfastcvopt.so
@@ -417,8 +412,6 @@ vendor/lib/liboemcamera.so
 vendor/lib/libois_lc898122.so
 vendor/lib/libomx-dts.so
 vendor/lib/libpvr.so
-vendor/lib/libqcci_legacy.so
-vendor/lib/libqdi.so
 vendor/lib/libquipc_os_api.so
 vendor/lib/libquipc_ulp_adapter.so
 vendor/lib/librmp.so
@@ -431,7 +424,6 @@ vendor/lib/libsecureui.so
 vendor/lib/libsecureui_svcsock.so
 vendor/lib/libsecureuisvc_jni.so
 vendor/lib/libsi.so
-vendor/lib/libsmemlog.so
 vendor/lib/libsrsprocessing.so
 vendor/lib/libssd.so
 vendor/lib/libsurround_proc.so
@@ -477,7 +469,6 @@ vendor/lib64/libadiertac.so
 vendor/lib64/libadsprpc.so
 vendor/lib64/libalarmservice_jni.so
 vendor/lib64/libaudcal.so
-vendor/lib64/libconfigdb.so
 vendor/lib64/libextendedremotedisplay.so
 vendor/lib64/libgeofence.so
 vendor/lib64/libhwdaphal.so
@@ -488,8 +479,6 @@ vendor/lib64/libmasc.so
 vendor/lib64/libmdsprpc.so
 vendor/lib64/libmsapm_jni.so
 vendor/lib64/libpvr.so
-vendor/lib64/libqcci_legacy.so
-vendor/lib64/libqdi.so
 vendor/lib64/libquipc_os_api.so
 vendor/lib64/libquipc_ulp_adapter.so
 vendor/lib64/librmp.so
@@ -498,7 +487,6 @@ vendor/lib64/libsecureui.so
 vendor/lib64/libsecureui_svcsock.so
 vendor/lib64/libsecureuisvc_jni.so
 vendor/lib64/libsi.so
-vendor/lib64/libsmemlog.so
 vendor/lib64/libssd.so
 vendor/lib64/libsystem_health_mon.so
 vendor/lib64/libulp2.so
@@ -542,13 +530,9 @@ vendor/firmware/libpn547_pku.so
 # Radio / QMI
 bin/dpmd
 bin/ipacm-diag
-bin/netmgrd
 etc/IPACM_cfg.xml
 etc/cne/SwimConfig.xml
 etc/cne/andsfCne.xml
-etc/data/dsi_config.xml
-etc/data/netmgr_config.xml
-etc/data/qmi_config.xml
 etc/dpm/fdMgr/fd.conf
 etc/dpm/nsrm/NsrmConfiguration.xml
 etc/permissions/cneapiclient.xml
@@ -562,56 +546,24 @@ vendor/lib/libcne.so
 vendor/lib/libcneapiclient.so
 vendor/lib/libcneconn.so
 vendor/lib/libcneqmiutils.so
-vendor/lib/libdiag.so
 vendor/lib/libdpmctmgr.so
 vendor/lib/libdpmfdmgr.so
 vendor/lib/libdpmframework.so
 vendor/lib/libdpmnsrm.so
-vendor/lib/libdsi_netctrl.so
-vendor/lib/libdsutils.so
-vendor/lib/libidl.so
 vendor/lib/libimscamera_jni.so
-vendor/lib/libnetmgr.so
-vendor/lib/libqdp.so
-vendor/lib/libqmi.so
-vendor/lib/libqmi_cci.so
-vendor/lib/libqmi_client_helper.so
-vendor/lib/libqmi_client_qmux.so
-vendor/lib/libqmi_common_so.so
-vendor/lib/libqmi_csi.so
-vendor/lib/libqmi_encdec.so
-vendor/lib/libqmiservices.so
-vendor/lib/libril-qc-qmi-1.so
-vendor/lib/libril-qcril-hook-oem.so
 vendor/lib64/libDiagService.so
 vendor/lib64/libNimsWrap.so
 vendor/lib64/libcne.so
 vendor/lib64/libcneapiclient.so
 vendor/lib64/libcneconn.so
 vendor/lib64/libcneqmiutils.so
-vendor/lib64/libdiag.so
 vendor/lib64/libdiagbridge.so
 vendor/lib64/libdpmctmgr.so
 vendor/lib64/libdpmfdmgr.so
 vendor/lib64/libdpmframework.so
 vendor/lib64/libdpmnsrm.so
-vendor/lib64/libdsi_netctrl.so
-vendor/lib64/libdsutils.so
-vendor/lib64/libidl.so
 vendor/lib64/libimscamera_jni.so
-vendor/lib64/libnetmgr.so
-vendor/lib64/libqdp.so
-vendor/lib64/libqmi.so
-vendor/lib64/libqmi_cci.so
-vendor/lib64/libqmi_client_helper.so
-vendor/lib64/libqmi_client_qmux.so
-vendor/lib64/libqmi_common_so.so
-vendor/lib64/libqmi_csi.so
 vendor/lib64/libqmi_csvt_srvc.so
-vendor/lib64/libqmi_encdec.so
-vendor/lib64/libqmiservices.so
-vendor/lib64/libril-qc-qmi-1.so
-vendor/lib64/libril-qcril-hook-oem.so
 
 # Security / DRM
 bin/qseecomd
@@ -686,3 +638,7 @@ lib64/libsnsutils.so
 -lib64/libloc_ds_api.so
 -lib/libdashplayer.so
 -lib64/libdashplayer.so
+
+# 32-bit radio libraries (the G4 copies are 64-bit)
+vendor/lib/libdsi_netctrl.so
+vendor/lib/libqdp.so
