@@ -61,3 +61,11 @@ vendor/lib64/libsd_sdk_display.so
 
 # Graphics - from LG G4 - version not recorded (g4-common 90370486)
 vendor/lib/libbccQTI.so
+
+# Peripheral manager - from LG G4 - V20G
+bin/pm-proxy
+bin/pm-service
+vendor/lib/libmdmdetect.so
+vendor/lib/libperipheral_client.so
+vendor/lib64/libmdmdetect.so
+vendor/lib64/libperipheral_client.so
