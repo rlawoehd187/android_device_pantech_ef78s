@@ -1,0 +1,321 @@
+diff --git a/daemon/usb.cpp b/daemon/usb.cpp
+index 4366ea9..9e639f0 100644
+--- a/daemon/usb.cpp
++++ b/daemon/usb.cpp
+@@ -28,10 +28,16 @@
+ #include <unistd.h>
+ 
+ #include <linux/usb/functionfs.h>
++#include <pthread.h>
++#include <signal.h>
+ #include <sys/eventfd.h>
++#include <sys/syscall.h>
+ 
+ #include <algorithm>
+ #include <array>
++#include <atomic>
++#include <condition_variable>
++#include <deque>
+ #include <future>
+ #include <memory>
+ #include <mutex>
+@@ -97,47 +103,156 @@ struct IoBlock {
+ using IoReadBlock = IoBlock<Block>;
+ using IoWriteBlock = IoBlock<std::shared_ptr<Block>>;
+ 
+-struct ScopedAioContext {
+-    ScopedAioContext() = default;
+-    ~ScopedAioContext() { reset(); }
++static constexpr int kInterruptionSignal = SIGUSR1;
+ 
+-    ScopedAioContext(ScopedAioContext&& move) { reset(move.release()); }
+-    ScopedAioContext(const ScopedAioContext& copy) = delete;
++static void InstallInterruptionHandler() {
++    // signal() would set SA_RESTART, and interrupted endpoint I/O must return EINTR instead.
++    static std::once_flag handler_once;
++    std::call_once(handler_once, []() {
++        struct sigaction action = {};
++        action.sa_handler = [](int) {};
++        sigemptyset(&action.sa_mask);
++        sigaction(kInterruptionSignal, &action, nullptr);
++    });
++}
+ 
+-    ScopedAioContext& operator=(ScopedAioContext&& move) {
+-        reset(move.release());
+-        return *this;
++// FunctionFS endpoints on kernels older than 3.18 do not implement AIO, so io_submit() cannot be
++// used on them. Provide the same submit and complete model with one blocking I/O thread per
++// direction. Transfers in one direction run one at a time and complete in submission order.
++class BlockingAio {
++  public:
++    BlockingAio() {
++        InstallInterruptionHandler();
++        LOG(INFO) << "using blocking I/O for FunctionFS endpoints";
++        read_worker_.thread = std::thread([this]() { Run(&read_worker_); });
++        write_worker_.thread = std::thread([this]() { Run(&write_worker_); });
+     }
+-    ScopedAioContext& operator=(const ScopedAioContext& copy) = delete;
+ 
+-    static ScopedAioContext Create(size_t max_events) {
+-        aio_context_t ctx = 0;
+-        if (io_setup(max_events, &ctx) != 0) {
+-            PLOG(FATAL) << "failed to create aio_context_t";
++    ~BlockingAio() { Stop(); }
++
++    BlockingAio(const BlockingAio& copy) = delete;
++    BlockingAio& operator=(const BlockingAio& copy) = delete;
++
++    bool Submit(const struct iocb& control) {
++        std::lock_guard<std::mutex> lock(mutex_);
++        if (stopping_) {
++            return false;
+         }
+-        ScopedAioContext result;
+-        result.reset(ctx);
+-        return result;
++
++        Worker& worker = control.aio_lio_opcode == IOCB_CMD_PREAD ? read_worker_ : write_worker_;
++        worker.queue.push_back(control);
++        worker.wake.notify_one();
++        return true;
+     }
+ 
+-    aio_context_t release() {
+-        aio_context_t result = context_;
+-        context_ = 0;
+-        return result;
++    int GetEvents(struct io_event* events, int max_events) {
++        std::lock_guard<std::mutex> lock(mutex_);
++        int count = 0;
++        while (count < max_events && !completed_.empty()) {
++            events[count++] = completed_.front();
++            completed_.pop_front();
++        }
++        return count;
+     }
+ 
+-    void reset(aio_context_t new_context = 0) {
+-        if (context_ != 0) {
+-            io_destroy(context_);
++    // Interrupts in-flight transfers and completes everything still queued with an error.
++    void Stop() {
++        {
++            std::lock_guard<std::mutex> lock(mutex_);
++            if (stopping_) {
++                return;
++            }
++            stopping_ = true;
+         }
+ 
+-        context_ = new_context;
+-    }
++        read_worker_.wake.notify_all();
++        write_worker_.wake.notify_all();
++        Join(&read_worker_);
++        Join(&write_worker_);
++
++        std::deque<struct iocb> pending;
++        {
++            std::lock_guard<std::mutex> lock(mutex_);
++            pending.swap(read_worker_.queue);
++            pending.insert(pending.end(), write_worker_.queue.begin(), write_worker_.queue.end());
++            write_worker_.queue.clear();
++        }
+ 
+-    aio_context_t get() { return context_; }
++        for (const struct iocb& control : pending) {
++            Complete(control, -ECANCELED);
++        }
++    }
+ 
+   private:
+-    aio_context_t context_ = 0;
++    struct Worker {
++        std::deque<struct iocb> queue;
++        std::condition_variable wake;
++        std::thread thread;
++        std::atomic<bool> finished = false;
++    };
++
++    void Run(Worker* worker) {
++        adb_thread_setname(worker == &read_worker_ ? "UsbFfs-read" : "UsbFfs-write");
++
++        while (true) {
++            struct iocb control;
++            {
++                std::unique_lock<std::mutex> lock(mutex_);
++                worker->wake.wait(lock, [&]() { return stopping_ || !worker->queue.empty(); });
++                if (stopping_) {
++                    break;
++                }
++                control = worker->queue.front();
++                worker->queue.pop_front();
++            }
++
++            Complete(control, Transfer(control));
++        }
++
++        worker->finished = true;
++    }
++
++    int64_t Transfer(const struct iocb& control) {
++        long number = control.aio_lio_opcode == IOCB_CMD_PREAD ? __NR_read : __NR_write;
++        while (true) {
++            long rc = syscall(number, control.aio_fildes, control.aio_buf, control.aio_nbytes);
++            if (rc >= 0) {
++                return rc;
++            }
++            if (errno != EINTR || stopping_) {
++                return -errno;
++            }
++        }
++    }
++
++    void Complete(const struct iocb& control, int64_t result) {
++        struct io_event event = {};
++        event.data = control.aio_data;
++        event.res = result;
++        {
++            std::lock_guard<std::mutex> lock(mutex_);
++            completed_.push_back(event);
++        }
++
++        uint64_t notify = 1;
++        if (adb_write(static_cast<int>(control.aio_resfd), &notify, sizeof(notify)) < 0) {
++            PLOG(FATAL) << "failed to notify worker eventfd of completed transfer";
++        }
++    }
++
++    void Join(Worker* worker) {
++        while (!worker->finished) {
++            pthread_kill(worker->thread.native_handle(), kInterruptionSignal);
++            std::this_thread::sleep_for(10ms);
++        }
++        worker->thread.join();
++    }
++
++    std::mutex mutex_;
++    std::atomic<bool> stopping_ = false;
++    std::deque<struct io_event> completed_;
++    Worker read_worker_;
++    Worker write_worker_;
+ };
+ 
+ struct UsbFfsConnection : public Connection {
+@@ -159,8 +274,6 @@ struct UsbFfsConnection : public Connection {
+         if (monitor_event_fd_ == -1) {
+             PLOG(FATAL) << "failed to create eventfd";
+         }
+-
+-        aio_context_ = ScopedAioContext::Create(kUsbReadQueueDepth + kUsbWriteQueueDepth);
+     }
+ 
+     ~UsbFfsConnection() {
+@@ -170,7 +283,7 @@ struct UsbFfsConnection : public Connection {
+ 
+         // We need to explicitly close our file descriptors before we notify our destruction,
+         // because the thread listening on the future will immediately try to reopen the endpoint.
+-        aio_context_.reset();
++        aio_context_.Stop();
+         control_fd_.reset();
+         read_fd_.reset();
+         write_fd_.reset();
+@@ -251,8 +364,7 @@ struct UsbFfsConnection : public Connection {
+         // until it dies, and then report failure to the transport via HandleError, which will
+         // eventually result in the transport being destroyed, which will result in UsbFfsConnection
+         // being destroyed, which unblocks the open thread and restarts this entire process.
+-        static std::once_flag handler_once;
+-        std::call_once(handler_once, []() { signal(kInterruptionSignal, [](int) {}); });
++        InstallInterruptionHandler();
+ 
+         monitor_thread_ = std::thread([this]() {
+             adb_thread_setname("UsbFfs-monitor");
+@@ -433,6 +545,9 @@ struct UsbFfsConnection : public Connection {
+             return;
+         }
+ 
++        // Fail the outstanding transfers so that the worker sees an error and exits.
++        aio_context_.Stop();
++
+         pthread_t worker_thread_handle = worker_thread_.native_handle();
+         while (true) {
+             int rc = pthread_kill(worker_thread_handle, kInterruptionSignal);
+@@ -484,12 +599,7 @@ struct UsbFfsConnection : public Connection {
+     void ReadEvents() {
+         static constexpr size_t kMaxEvents = kUsbReadQueueDepth + kUsbWriteQueueDepth;
+         struct io_event events[kMaxEvents];
+-        struct timespec timeout = {.tv_sec = 0, .tv_nsec = 0};
+-        int rc = io_getevents(aio_context_.get(), 0, kMaxEvents, events, &timeout);
+-        if (rc == -1) {
+-            HandleError(StringPrintf("io_getevents failed while reading: %s", strerror(errno)));
+-            return;
+-        }
++        int rc = aio_context_.GetEvents(events, kMaxEvents);
+ 
+         for (int event_idx = 0; event_idx < rc; ++event_idx) {
+             auto& event = events[event_idx];
+@@ -600,9 +710,8 @@ struct UsbFfsConnection : public Connection {
+ 
+     bool SubmitRead(IoReadBlock* block) {
+         block->pending = true;
+-        struct iocb* iocb = &block->control;
+-        if (io_submit(aio_context_.get(), 1, &iocb) != 1) {
+-            HandleError(StringPrintf("failed to submit read: %s", strerror(errno)));
++        if (!aio_context_.Submit(block->control)) {
++            HandleError("failed to submit read: USB I/O stopped");
+             return false;
+         }
+ 
+@@ -656,23 +765,18 @@ struct UsbFfsConnection : public Connection {
+             return;
+         }
+ 
+-        struct iocb* iocbs[kUsbWriteQueueDepth];
+-        for (int i = 0; i < writes_to_submit; ++i) {
+-            CHECK(!write_requests_[writes_submitted_ + i].pending);
+-            write_requests_[writes_submitted_ + i].pending = true;
+-            iocbs[i] = &write_requests_[writes_submitted_ + i].control;
+-            LOG(VERBOSE) << "submitting write_request " << static_cast<void*>(iocbs[i]);
+-        }
+-
++        size_t first_write = writes_submitted_;
+         writes_submitted_ += writes_to_submit;
+ 
+-        int rc = io_submit(aio_context_.get(), writes_to_submit, iocbs);
+-        if (rc == -1) {
+-            HandleError(StringPrintf("failed to submit write requests: %s", strerror(errno)));
+-            return;
+-        } else if (rc != writes_to_submit) {
+-            LOG(FATAL) << "failed to submit all writes: wanted to submit " << writes_to_submit
+-                       << ", actually submitted " << rc;
++        for (int i = 0; i < writes_to_submit; ++i) {
++            IoWriteBlock& block = write_requests_[first_write + i];
++            CHECK(!block.pending);
++            block.pending = true;
++            LOG(VERBOSE) << "submitting write_request " << static_cast<void*>(&block.control);
++            if (!aio_context_.Submit(block.control)) {
++                HandleError("failed to submit write requests: USB I/O stopped");
++                return;
++            }
+         }
+     }
+ 
+@@ -697,7 +801,7 @@ struct UsbFfsConnection : public Connection {
+     unique_fd worker_event_fd_;
+     unique_fd monitor_event_fd_;
+ 
+-    ScopedAioContext aio_context_;
++    BlockingAio aio_context_;
+     unique_fd control_fd_;
+     unique_fd read_fd_;
+     unique_fd write_fd_;
+@@ -719,8 +823,6 @@ struct UsbFfsConnection : public Connection {
+     std::deque<IoWriteBlock> write_requests_ GUARDED_BY(write_mutex_);
+     size_t next_write_id_ GUARDED_BY(write_mutex_) = 0;
+     size_t writes_submitted_ GUARDED_BY(write_mutex_) = 0;
+-
+-    static constexpr int kInterruptionSignal = SIGUSR1;
+ };
+ 
+ static void usb_ffs_open_thread() {

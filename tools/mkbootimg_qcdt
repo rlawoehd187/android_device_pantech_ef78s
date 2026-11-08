@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+"""Build a version 0 Android boot image with a legacy Qualcomm QCDT section.
+
+AOSP mkbootimg treats the header field after page_size as header_version, while
+this device's bootloader reads it as dt_size. Only the options the build system
+passes for this device are accepted; anything else is an error.
+"""
+
+import argparse
+import hashlib
+import re
+import struct
+import sys
+
+BOOT_MAGIC = b"ANDROID!"
+NAME_SIZE = 16
+CMDLINE_SIZE = 512
+EXTRA_CMDLINE_SIZE = 1024
+
+
+def parse_int(value):
+    return int(value, 0)
+
+
+def read_file(path):
+    if path is None:
+        return b""
+    with open(path, "rb") as handle:
+        return handle.read()
+
+
+def page_padding(size, pagesize):
+    return b"\0" * ((pagesize - size % pagesize) % pagesize)
+
+
+def encode_os_version(version):
+    if not version:
+        return 0
+    parts = [int(part) for part in version.split(".")]
+    if len(parts) > 3 or any(part >= 128 for part in parts):
+        sys.exit(f"mkbootimg_qcdt: invalid os_version {version!r}")
+    parts += [0] * (3 - len(parts))
+    return (parts[0] << 14) | (parts[1] << 7) | parts[2]
+
+
+def encode_patch_level(level):
+    if not level:
+        return 0
+    match = re.fullmatch(r"(\d{4})-(\d{2})(-\d{2})?", level)
+    if not match:
+        sys.exit(f"mkbootimg_qcdt: invalid os_patch_level {level!r}")
+    return ((int(match.group(1)) - 2000) << 4) | int(match.group(2))
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument("--kernel", required=True)
+    parser.add_argument("--ramdisk", required=True)
+    parser.add_argument("--second")
+    parser.add_argument("--dt", required=True)
+    parser.add_argument("--cmdline", default="")
+    parser.add_argument("--base", type=parse_int, default=0x10000000)
+    parser.add_argument("--kernel_offset", type=parse_int, default=0x00008000)
+    parser.add_argument("--ramdisk_offset", type=parse_int, default=0x01000000)
+    parser.add_argument("--second_offset", type=parse_int, default=0x00f00000)
+    parser.add_argument("--tags_offset", type=parse_int, default=0x00000100)
+    parser.add_argument("--pagesize", type=parse_int, default=2048)
+    parser.add_argument("--board", default="")
+    parser.add_argument("--os_version", default="")
+    parser.add_argument("--os_patch_level", default="")
+    parser.add_argument("--header_version", type=parse_int, default=0)
+    parser.add_argument("--output", required=True)
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    if args.header_version != 0:
+        sys.exit("mkbootimg_qcdt: only header version 0 is supported")
+
+    board = args.board.encode()
+    if len(board) >= NAME_SIZE:
+        sys.exit("mkbootimg_qcdt: board name is too long")
+    cmdline = args.cmdline.encode()
+    if len(cmdline) >= CMDLINE_SIZE + EXTRA_CMDLINE_SIZE:
+        sys.exit("mkbootimg_qcdt: cmdline is too long")
+
+    kernel = read_file(args.kernel)
+    ramdisk = read_file(args.ramdisk)
+    second = read_file(args.second)
+    dt = read_file(args.dt)
+    if not dt:
+        sys.exit("mkbootimg_qcdt: dt image is empty")
+
+    image_id = hashlib.sha1()
+    for section in (kernel, ramdisk, second, dt):
+        image_id.update(section)
+        image_id.update(struct.pack("<I", len(section)))
+
+    os_info = (encode_os_version(args.os_version) << 11) | encode_patch_level(
+        args.os_patch_level
+    )
+    header = BOOT_MAGIC + struct.pack(
+        "<10I",
+        len(kernel),
+        args.base + args.kernel_offset,
+        len(ramdisk),
+        args.base + args.ramdisk_offset,
+        len(second),
+        args.base + args.second_offset,
+        args.base + args.tags_offset,
+        args.pagesize,
+        len(dt),
+        os_info,
+    )
+    header += board.ljust(NAME_SIZE, b"\0")
+    header += cmdline[: CMDLINE_SIZE - 1].ljust(CMDLINE_SIZE, b"\0")
+    header += image_id.digest().ljust(32, b"\0")
+    header += cmdline[CMDLINE_SIZE - 1 :].ljust(EXTRA_CMDLINE_SIZE, b"\0")
+
+    with open(args.output, "wb") as output:
+        output.write(header)
+        output.write(page_padding(len(header), args.pagesize))
+        for section in (kernel, ramdisk, second, dt):
+            output.write(section)
+            output.write(page_padding(len(section), args.pagesize))
+
+
+if __name__ == "__main__":
+    main()
