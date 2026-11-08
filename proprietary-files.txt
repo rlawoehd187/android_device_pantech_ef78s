@@ -200,14 +200,14 @@ vendor/lib/libchromatix_s5k6b2yx_vt_common.so
 vendor/lib/libmmcamera_eeprom_util.so
 vendor/lib/libmmcamera_imx132.so
 vendor/lib/libmmcamera_imx135.so
-vendor/lib/libmmcamera_imx214.so
+vendor/lib/libmmcamera_imx214.so:vendor/lib/libmmcamera_imx214_stock.so
 vendor/lib/libmmcamera_imx230.so
 vendor/lib/libmmcamera_mt9m114.so
 vendor/lib/libmmcamera_ov4688.so
 vendor/lib/libmmcamera_ov5645.so
 vendor/lib/libmmcamera_rumba_sa_eeprom.so
 vendor/lib/libmmcamera_s5k3m2xx.so
-vendor/lib/libmmcamera_s5k5e2.so
+vendor/lib/libmmcamera_s5k5e2.so:vendor/lib/libmmcamera_s5k5e2_stock.so
 vendor/lib/libmmcamera_s5k6b2yx.so
 vendor/lib64/libmmcamera2_q3a_core.so
 vendor/lib64/libmmcamera2_sensor_debug.so

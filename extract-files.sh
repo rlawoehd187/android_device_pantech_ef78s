@@ -66,4 +66,8 @@ extract_qc "bullhead|libra" "$SRC_QC" invert
 extract_qc "bullhead" "$SRC_BULLHEAD"
 extract_qc "libra" "$SRC_LIBRA"
 
+# The libra sensor module only looks for the sensors of the Mi 4c
+LC_ALL=C sed -i "s/\x00imx258\x00/\x00imx214\x00/; s/\x00ov5670\x00/\x00s5k5e2\x00/" \
+    "$CM_ROOT"/vendor/"$VENDOR"/"$DEVICE"/proprietary/vendor/lib/libmmcamera2_sensor_modules.so
+
 "$MY_DIR"/setup-makefiles.sh

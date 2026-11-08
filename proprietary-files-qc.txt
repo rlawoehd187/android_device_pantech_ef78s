@@ -137,6 +137,7 @@ vendor/qcril.db
 bin/cnss-daemon
 
 # Blobs from the Xiaomi Mi 4c, built against the same LA.BF64.1.2.3_rb1.16 camera interface.
+# libmmcamera2_sensor_modules.so is patched by extract-files.sh for the ef78s sensors.
 
 # Camera - from libra (Mi 4c) - 7.8.14
 lib/hw/camera.msm8992.so

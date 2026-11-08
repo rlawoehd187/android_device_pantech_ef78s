@@ -87,6 +87,8 @@ PRODUCT_COPY_FILES += \
 
 # Camera
 PRODUCT_PACKAGES += \
+    libmmcamera_imx214 \
+    libmmcamera_s5k5e2 \
     Snap
 
 # Charger
