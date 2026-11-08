@@ -85,3 +85,6 @@ wifi.supplicant_scan_interval=15
 
 # ADB
 persist.sys.root_access=2
+
+# Camera
+persist.camera.HAL3.enabled=1
