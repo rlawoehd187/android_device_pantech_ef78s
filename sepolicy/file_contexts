@@ -1,0 +1,1 @@
+/bt_firmware(/.*)?      u:object_r:bt_firmware_file:s0

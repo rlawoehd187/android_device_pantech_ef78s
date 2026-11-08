@@ -1,0 +1,8 @@
+#ifndef _BDROID_BUILDCFG_H
+#define _BDROID_BUILDCFG_H
+
+#define BTM_DEF_LOCAL_NAME   "VEGA IM-A000S"
+#define BLE_VND_INCLUDED     TRUE
+#define BTM_LE_SECURE_CONN   TRUE
+
+#endif
