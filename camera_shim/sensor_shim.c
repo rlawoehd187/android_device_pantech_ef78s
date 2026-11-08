@@ -23,6 +23,7 @@
 #define TAIL_SIZE 0x9c
 #define TAIL_HEAD_SIZE 0xc
 #define TAIL_SKIP_END 0x74
+#define FLASH_NAME_OFFSET 0x80
 #define SHIM_STRUCT_SIZE 0x3000
 
 static char converted[SHIM_STRUCT_SIZE];
@@ -57,6 +58,13 @@ void *sensor_open_lib(void)
     }
 
     memcpy(converted, stock, CHROMATIX_OFFSET);
+
+    /*
+     * The flash has its own kernel driver. Only a flash library has to be
+     * found, so name the one this camera stack ships.
+     */
+    if (converted[FLASH_NAME_OFFSET])
+        strcpy(converted + FLASH_NAME_OFFSET, "pmic");
 
     for (i = 0; i < CHROMATIX_ENTRIES; i++) {
         const uint32_t *src = (const uint32_t *)(stock + CHROMATIX_OFFSET) +
