@@ -70,4 +70,9 @@ extract_qc "libra" "$SRC_LIBRA"
 LC_ALL=C sed -i "s/\x00imx258\x00/\x00imx214\x00/; s/\x00ov5670\x00/\x00s5k5e2\x00/" \
     "$CM_ROOT"/vendor/"$VENDOR"/"$DEVICE"/proprietary/vendor/lib/libmmcamera2_sensor_modules.so
 
+# The AF core divides by an ROI size that can be 0 on the first open after boot
+Q3A="$CM_ROOT"/vendor/"$VENDOR"/"$DEVICE"/proprietary/vendor/lib/libmmcamera2_q3a_core.so
+printf '\x27\xf0\x38\xbc' | dd of="$Q3A" bs=1 seek=$((0x26f70)) conv=notrunc 2>/dev/null
+printf '\xb1\xf8\x4e\x2e\x00\x2a\x08\xbf\x01\x22\xd8\xf7\xc1\xbb' | dd of="$Q3A" bs=1 seek=$((0x4e7e4)) conv=notrunc 2>/dev/null
+
 "$MY_DIR"/setup-makefiles.sh
