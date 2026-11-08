@@ -58,9 +58,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/handheld_core_hardware.xml:system/etc/permissions/handheld_core_hardware.xml
 
 # ADB
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/adb_keys:root/adb_keys
-
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
     persist.sys.usb.config=adb
 
