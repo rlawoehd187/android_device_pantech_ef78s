@@ -24,4 +24,12 @@ $(eval $(call ef78s-rfs-links,mdm,adsp,lpass))
 $(eval $(call ef78s-rfs-links,mdm,mpss,modem))
 $(eval $(call ef78s-rfs-links,mdm,sparrow,sparrow))
 $(eval $(call ef78s-rfs-links,apq,gnss,modem))
+
+# The WLAN driver requests its MAC file from the firmware path
+WLAN_MAC_SYMLINK := $(TARGET_OUT_ETC)/firmware/wlan/qca_cld/wlan_mac.bin
+$(WLAN_MAC_SYMLINK): $(LOCAL_INSTALLED_MODULE)
+	@echo "Creating WLAN MAC link: $@"
+	@mkdir -p $(dir $@)
+	$(hide) ln -sf /data/misc/wifi/wlan_mac.bin $@
+ALL_DEFAULT_INSTALLED_MODULES += $(WLAN_MAC_SYMLINK)
 endif

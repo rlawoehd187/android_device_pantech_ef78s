@@ -29,6 +29,26 @@
 #
 # start ril-daemon only for targets on which radio is present
 #
+# The factory WLAN MAC record is empty on this device, so derive a stable
+# locally administered address from the serial number for the driver.
+write_wlan_mac()
+{
+    typeset -u serial=`getprop ro.serialno`
+    case "$serial" in
+        [0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F][0-9A-F]) ;;
+        *) return ;;
+    esac
+    {
+        echo "Intf0MacAddress=0200$serial"
+        echo "Intf1MacAddress=0600$serial"
+        echo "Intf2MacAddress=0A00$serial"
+        echo "Intf3MacAddress=0E00$serial"
+        echo "END"
+    } > /data/misc/wifi/wlan_mac.bin
+    chown -h wifi.wifi /data/misc/wifi/wlan_mac.bin
+    chmod 660 /data/misc/wifi/wlan_mac.bin
+}
+
 start_copying_prebuilt_qcril_db()
 {
     if [ -f /system/vendor/qcril.db -a ! -f /data/misc/radio/qcril.db ]; then
@@ -38,6 +58,7 @@ start_copying_prebuilt_qcril_db()
 }
 
 start_copying_prebuilt_qcril_db
+write_wlan_mac
 
 baseband=`getprop ro.baseband`
 sgltecsfb=`getprop persist.radio.sglte_csfb`
