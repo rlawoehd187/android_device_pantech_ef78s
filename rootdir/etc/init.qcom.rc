@@ -452,6 +452,10 @@ service rmt_storage /system/bin/rmt_storage
     user root
     disabled
 
+service tftp_server /system/bin/tftp_server
+    class core
+    user root
+
 service rfs_access /system/bin/rfs_access
    class core
    user root
