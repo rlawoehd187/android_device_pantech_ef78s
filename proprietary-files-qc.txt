@@ -130,3 +130,8 @@ vendor/lib64/libril-qcril-hook-oem.so
 
 # RIL - from LG G4 - V20A
 vendor/qcril.db
+
+# Blobs from the Nexus 5X, which shares the MSM8992 and the qcacld driver.
+
+# CNSS - from bullhead (Nexus 5X) - NMF26F
+bin/cnss-daemon

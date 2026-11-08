@@ -35,8 +35,8 @@ if [ ! -f "$HELPER" ]; then
 fi
 . "$HELPER"
 
-if [ $# -gt 2 ]; then
-    echo "usage: $0 [PATH_TO_EXPANDED_ROM] [PATH_TO_QC_BLOBS]"
+if [ $# -gt 3 ]; then
+    echo "usage: $0 [PATH_TO_EXPANDED_ROM] [PATH_TO_QC_BLOBS] [PATH_TO_BULLHEAD_BLOBS]"
     echo ""
     echo "PATH_TO_EXPANDED_ROM defaults to adb. PATH_TO_QC_BLOBS defaults to the"
     echo "extracted LG G4 blobs in vendor/lge/g4-common/proprietary."
@@ -45,10 +45,23 @@ fi
 
 SRC="${1:-adb}"
 SRC_QC="${2:-$CM_ROOT/vendor/lge/g4-common/proprietary}"
+SRC_BULLHEAD="${3:-$CM_ROOT/vendor/lge/bullhead/proprietary}"
 
 setup_vendor "$DEVICE" "$VENDOR" "$CM_ROOT"
 
+# Each section of proprietary-files-qc.txt names the device its blobs come from
+extract_qc() {
+    local list
+    list=$(mktemp)
+    awk -v re="- from ($1) " -v invert="$3" \
+        '/^#/ { on = (($0 ~ re) != (invert != "")) } on && !/^#/' \
+        "$MY_DIR"/proprietary-files-qc.txt > "$list"
+    extract "$list" "$2"
+    rm -f "$list"
+}
+
 extract "$MY_DIR"/proprietary-files.txt "$SRC"
-extract "$MY_DIR"/proprietary-files-qc.txt "$SRC_QC"
+extract_qc "bullhead" "$SRC_QC" invert
+extract_qc "bullhead" "$SRC_BULLHEAD"
 
 "$MY_DIR"/setup-makefiles.sh

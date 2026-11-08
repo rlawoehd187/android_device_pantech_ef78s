@@ -23,7 +23,6 @@ vendor/lib64/libaudioalsa.so
 
 # Bluetooth / Wi-Fi
 bin/btnvtool
-bin/cnss-daemon
 bin/cnss_diag
 bin/hci_qcomm_init
 bin/wcnss_filter
