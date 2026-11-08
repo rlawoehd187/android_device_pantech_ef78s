@@ -31,3 +31,14 @@ endef
 
 $(eval $(call ef78s-af-shim,camera))
 $(eval $(call ef78s-af-shim,camcorder))
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libmmcamera_rumba_sa_eeprom
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+LOCAL_SRC_FILES := eeprom_shim.c
+LOCAL_CFLAGS := -Wall -Werror
+LOCAL_SHARED_LIBRARIES := libdl liblog
+LOCAL_MULTILIB := 32
+LOCAL_PROPRIETARY_MODULE := true
+include $(BUILD_SHARED_LIBRARY)

@@ -23,8 +23,6 @@
 #define TAIL_SIZE 0x9c
 #define TAIL_HEAD_SIZE 0xc
 #define TAIL_SKIP_END 0x74
-#define EEPROM_NAME_OFFSET 0x20
-#define EEPROM_NAME_SIZE 0x20
 #define SHIM_STRUCT_SIZE 0x3000
 
 static char converted[SHIM_STRUCT_SIZE];
@@ -59,9 +57,6 @@ void *sensor_open_lib(void)
     }
 
     memcpy(converted, stock, CHROMATIX_OFFSET);
-
-    /* The module crashes with the stock EEPROM library, so skip it for now */
-    memset(converted + EEPROM_NAME_OFFSET, 0, EEPROM_NAME_SIZE);
 
     for (i = 0; i < CHROMATIX_ENTRIES; i++) {
         const uint32_t *src = (const uint32_t *)(stock + CHROMATIX_OFFSET) +

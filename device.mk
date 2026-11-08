@@ -90,6 +90,7 @@ PRODUCT_PACKAGES += \
     libactuator_rumba_sa_camcorder \
     libactuator_rumba_sa_camera \
     libmmcamera_imx214 \
+    libmmcamera_rumba_sa_eeprom \
     libmmcamera_s5k5e2 \
     Snap
 
