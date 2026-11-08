@@ -510,6 +510,12 @@ vendor/lib64/libdrmtime.so
 
 # Sensors
 bin/sensors.qcom
+lib/libgccdemangle.so
+lib/libqctdspsreg.so
+lib/libunwind-ptrace.so
+lib64/libgccdemangle.so
+lib64/libqctdspsreg.so
+lib64/libunwind-ptrace.so
 vendor/lib/hw/activity_recognition.msm8992.so
 vendor/lib/hw/sensors.msm8992.so
 vendor/lib/libsensor1.so
