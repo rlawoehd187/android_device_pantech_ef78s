@@ -35,25 +35,20 @@ if [ ! -f "$HELPER" ]; then
 fi
 . "$HELPER"
 
-if [ $# -eq 0 ]; then
-  SRC=adb
-else
-  if [ $# -eq 1 ]; then
-    SRC=$1
-  else
-    echo "$0: bad number of arguments"
+if [ $# -gt 2 ]; then
+    echo "usage: $0 [PATH_TO_EXPANDED_ROM] [PATH_TO_QC_BLOBS]"
     echo ""
-    echo "usage: $0 [PATH_TO_EXPANDED_ROM]"
-    echo ""
-    echo "If PATH_TO_EXPANDED_ROM is not specified, blobs will be extracted from"
-    echo "the device using adb pull."
+    echo "PATH_TO_EXPANDED_ROM defaults to adb. PATH_TO_QC_BLOBS defaults to the"
+    echo "extracted LG G4 blobs in vendor/lge/g4-common/proprietary."
     exit 1
-  fi
 fi
 
-# Initialize the helper
+SRC="${1:-adb}"
+SRC_QC="${2:-$CM_ROOT/vendor/lge/g4-common/proprietary}"
+
 setup_vendor "$DEVICE" "$VENDOR" "$CM_ROOT"
 
 extract "$MY_DIR"/proprietary-files.txt "$SRC"
+extract "$MY_DIR"/proprietary-files-qc.txt "$SRC_QC"
 
 "$MY_DIR"/setup-makefiles.sh

@@ -1,0 +1,2 @@
+# Qualcomm blobs newer than the Android 5.0 stock ones.
+# Each section records the source model and version of its blobs.
