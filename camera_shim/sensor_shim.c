@@ -25,8 +25,6 @@
 #define TAIL_SKIP_END 0x74
 #define EEPROM_NAME_OFFSET 0x20
 #define EEPROM_NAME_SIZE 0x20
-#define ACTUATOR_NAME_OFFSET 0x40
-#define ACTUATOR_NAME_SIZE 0x20
 #define SHIM_STRUCT_SIZE 0x3000
 
 static char converted[SHIM_STRUCT_SIZE];
@@ -62,11 +60,8 @@ void *sensor_open_lib(void)
 
     memcpy(converted, stock, CHROMATIX_OFFSET);
 
-    /* The stock EEPROM library has an incompatible function table, so skip it */
+    /* The module crashes with the stock EEPROM library, so skip it for now */
     memset(converted + EEPROM_NAME_OFFSET, 0, EEPROM_NAME_SIZE);
-
-    /* The stock AF tuning does not match this AF core, so run with fixed focus */
-    memset(converted + ACTUATOR_NAME_OFFSET, 0, ACTUATOR_NAME_SIZE);
 
     for (i = 0; i < CHROMATIX_ENTRIES; i++) {
         const uint32_t *src = (const uint32_t *)(stock + CHROMATIX_OFFSET) +

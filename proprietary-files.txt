@@ -76,8 +76,8 @@ vendor/lib/libactuator_rohm_bu64243gwz.so
 vendor/lib/libactuator_rohm_bu64243gwz_camcorder.so
 vendor/lib/libactuator_rohm_bu64243gwz_camera.so
 vendor/lib/libactuator_rumba_sa.so
-vendor/lib/libactuator_rumba_sa_camcorder.so
-vendor/lib/libactuator_rumba_sa_camera.so
+vendor/lib/libactuator_rumba_sa_camcorder.so:vendor/lib/libactuator_rumba_sa_camcorder_stock.so
+vendor/lib/libactuator_rumba_sa_camera.so:vendor/lib/libactuator_rumba_sa_camera_stock.so
 vendor/lib/libchromatix_imx132_common.so
 vendor/lib/libchromatix_imx132_cpp_liveshot.so
 vendor/lib/libchromatix_imx132_cpp_preview.so

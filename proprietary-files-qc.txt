@@ -241,3 +241,7 @@ etc/firmware/cpp_firmware_v1_2_0.fw
 etc/firmware/cpp_firmware_v1_4_0.fw
 etc/firmware/cpp_firmware_v1_6_0.fw
 etc/firmware/cpp_firmware_v1_8_0.fw
+
+# Camera AF tuning template - from libra (Mi 4c) - version not recorded (initial import ddf042e)
+vendor/lib/libactuator_dw9761b_camcorder.so
+vendor/lib/libactuator_dw9761b_camera.so
