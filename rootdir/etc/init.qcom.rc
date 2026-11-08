@@ -853,8 +853,6 @@ service thermal-engine /system/bin/thermal-engine
 
 service cnss-daemon /system/bin/cnss-daemon -n -l
     class late_start
-    user system
-    group system inet net_admin wifi
 
 on property:wlan.driver.status=ok
     start cnss-daemon
