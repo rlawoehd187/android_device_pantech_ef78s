@@ -1,42 +1,6 @@
 # Proprietary blobs extracted from stock IM-A000S (ef78s) LRX22G S0227005
 
 # Adreno / Graphics
-etc/firmware/a420_pfp.fw
-etc/firmware/a420_pm4.fw
-vendor/lib/egl/eglSubDriverAndroid.so
-vendor/lib/egl/libEGL_adreno.so
-vendor/lib/egl/libGLESv1_CM_adreno.so
-vendor/lib/egl/libGLESv2_adreno.so
-vendor/lib/egl/libQTapGLES.so
-vendor/lib/egl/libq3dtools_adreno.so
-vendor/lib/egl/libq3dtools_esx.so
-vendor/lib/libCB.so
-vendor/lib/libRSDriver_adreno.so
-vendor/lib/libadreno_utils.so
-vendor/lib/libc2d30-a3xx.so
-vendor/lib/libc2d30-a4xx.so
-vendor/lib/libgsl.so
-vendor/lib/libllvm-glnext.so
-vendor/lib/libllvm-qcom.so
-vendor/lib/librs_adreno.so
-vendor/lib/librs_adreno_sha1.so
-vendor/lib64/egl/eglSubDriverAndroid.so
-vendor/lib64/egl/libEGL_adreno.so
-vendor/lib64/egl/libGLESv1_CM_adreno.so
-vendor/lib64/egl/libGLESv2_adreno.so
-vendor/lib64/egl/libQTapGLES.so
-vendor/lib64/egl/libq3dtools_adreno.so
-vendor/lib64/egl/libq3dtools_esx.so
-vendor/lib64/libCB.so
-vendor/lib64/libRSDriver_adreno.so
-vendor/lib64/libadreno_utils.so
-vendor/lib64/libc2d30-a3xx.so
-vendor/lib64/libc2d30-a4xx.so
-vendor/lib64/libgsl.so
-vendor/lib64/libllvm-glnext.so
-vendor/lib64/libllvm-qcom.so
-vendor/lib64/librs_adreno.so
-vendor/lib64/librs_adreno_sha1.so
 
 # Audio
 etc/acdbdata/MTP/MTP_Bluetooth_cal.acdb
@@ -246,7 +210,6 @@ vendor/lib/libchromatix_s5k6b2yx_vt_common.so
 vendor/lib/libjpegdhw.so
 vendor/lib/libjpegdmahw.so
 vendor/lib/libjpegehw.so
-vendor/lib/libmm-qdcm.so
 vendor/lib/libmmcamera2_c2d_module.so
 vendor/lib/libmmcamera2_cpp_module.so
 vendor/lib/libmmcamera2_frame_algorithm.so
@@ -324,7 +287,6 @@ vendor/lib/libmmjpeg.so
 vendor/lib/libqomx_jpegdec.so
 vendor/lib/libqomx_jpegenc.so
 vendor/lib/libqomx_jpegenc_pipe.so
-vendor/lib64/libmm-qdcm.so
 vendor/lib64/libmmcamera2_q3a_core.so
 vendor/lib64/libmmcamera2_sensor_debug.so
 vendor/lib64/libmmcamera2_stats_algorithm.so
@@ -362,11 +324,8 @@ etc/firmware/venus.b03
 etc/firmware/venus.b04
 etc/firmware/venus.mbn
 etc/firmware/venus.mdt
-vendor/lib/libmm-abl-oem.so
-vendor/lib/libmm-abl.so
 vendor/lib/libmm-als.so
 vendor/lib/libmm-color-convertor.so
-vendor/lib/libmm-disp-apis.so
 vendor/lib/libmm-hdcpmgr.so
 vendor/lib/libmmQSM.so
 vendor/lib/libmmhttpstack.so
@@ -386,11 +345,8 @@ vendor/lib/libmmwfdinterface.so
 vendor/lib/libmmwfdsinkinterface.so
 vendor/lib/libmmwfdsrcinterface.so
 vendor/lib/libvoice-svc.so
-vendor/lib64/libmm-abl-oem.so
-vendor/lib64/libmm-abl.so
 vendor/lib64/libmm-als.so
 vendor/lib64/libmm-color-convertor.so
-vendor/lib64/libmm-disp-apis.so
 vendor/lib64/libmm-hdcpmgr.so
 vendor/lib64/libmmhttpstack.so
 vendor/lib64/libmmiipstreammmihttp.so
@@ -413,7 +369,6 @@ bin/adsprpcd
 bin/cnd
 bin/energy-awareness
 bin/irsc_util
-bin/mm-pp-daemon
 bin/msm_irqbalance
 bin/qmuxd
 bin/radish
@@ -427,7 +382,6 @@ lib64/libMcRegistry.so
 vendor/bin/qti
 vendor/lib/hw/sound_trigger.primary.msm8992.so
 vendor/lib/lib-sec-disp.so
-vendor/lib/libC2D2.so
 vendor/lib/libExtendedExtractor.so
 vendor/lib/libFileMux.so
 vendor/lib/libFlacSwDec.so
@@ -438,7 +392,6 @@ vendor/lib/libOmxEvrcDec.so
 vendor/lib/libOmxMux.so
 vendor/lib/libOmxQcelp13Dec.so
 vendor/lib/libOmxWmaDec.so
-vendor/lib/libOpenCL.so
 vendor/lib/libP11EncryptorDecryptor.so
 vendor/lib/libSSEPKCS11.so
 vendor/lib/libSecureUILib.so
@@ -447,9 +400,7 @@ vendor/lib/libadiertac.so
 vendor/lib/libadsprpc.so
 vendor/lib/libalarmservice_jni.so
 vendor/lib/libaudcal.so
-vendor/lib/libbccQTI.so
 vendor/lib/libconfigdb.so
-vendor/lib/libdisp-aba.so
 vendor/lib/libextendedremotedisplay.so
 vendor/lib/libfastcvadsp_stub.so
 vendor/lib/libfastcvopt.so
@@ -473,12 +424,10 @@ vendor/lib/libquipc_os_api.so
 vendor/lib/libquipc_ulp_adapter.so
 vendor/lib/librmp.so
 vendor/lib/librpmb.so
-vendor/lib/libscale.so
 vendor/lib/libscve.so
 vendor/lib/libscveTextRecoPostProcessing.so
 vendor/lib/libscve_mv.so
 vendor/lib/libscve_stub.so
-vendor/lib/libsd_sdk_display.so
 vendor/lib/libsecureui.so
 vendor/lib/libsecureui_svcsock.so
 vendor/lib/libsecureuisvc_jni.so
@@ -513,7 +462,6 @@ vendor/lib/soundfx/libqcbassboost.so
 vendor/lib/soundfx/libqcreverb.so
 vendor/lib/soundfx/libqcvirt.so
 vendor/lib64/lib-sec-disp.so
-vendor/lib64/libC2D2.so
 vendor/lib64/libCommandSvc.so
 vendor/lib64/libExtendedExtractor.so
 vendor/lib64/libFileMux.so
@@ -522,7 +470,6 @@ vendor/lib64/libOmxAacDec.so
 vendor/lib64/libOmxAmrwbplusDec.so
 vendor/lib64/libOmxMux.so
 vendor/lib64/libOmxWmaDec.so
-vendor/lib64/libOpenCL.so
 vendor/lib64/libP11EncryptorDecryptor.so
 vendor/lib64/libSSEPKCS11.so
 vendor/lib64/libSecureUILib.so
@@ -531,9 +478,7 @@ vendor/lib64/libadiertac.so
 vendor/lib64/libadsprpc.so
 vendor/lib64/libalarmservice_jni.so
 vendor/lib64/libaudcal.so
-vendor/lib64/libbccQTI.so
 vendor/lib64/libconfigdb.so
-vendor/lib64/libdisp-aba.so
 vendor/lib64/libextendedremotedisplay.so
 vendor/lib64/libgeofence.so
 vendor/lib64/libhwdaphal.so
@@ -551,8 +496,6 @@ vendor/lib64/libquipc_os_api.so
 vendor/lib64/libquipc_ulp_adapter.so
 vendor/lib64/librmp.so
 vendor/lib64/librpmb.so
-vendor/lib64/libscale.so
-vendor/lib64/libsd_sdk_display.so
 vendor/lib64/libsecureui.so
 vendor/lib64/libsecureui_svcsock.so
 vendor/lib64/libsecureuisvc_jni.so

@@ -44,8 +44,6 @@ on early-fs
     restorecon_recursive /persist
 
 on init
-    export LD_SHIM_LIBS /system/vendor/lib/egl/libEGL_adreno.so|libshim_adreno.so:/system/vendor/lib/egl/libGLESv2_adreno.so|libshim_adreno.so:/system/vendor/lib/egl/libQTapGLES.so|libshim_adreno.so:/system/vendor/lib/egl/libq3dtools_esx.so|libshim_adreno.so:/system/vendor/lib64/egl/libEGL_adreno.so|libshim_adreno.so:/system/vendor/lib64/egl/libGLESv2_adreno.so|libshim_adreno.so:/system/vendor/lib64/egl/libQTapGLES.so|libshim_adreno.so:/system/vendor/lib64/egl/libq3dtools_esx.so|libshim_adreno.so:/vendor/lib/egl/libEGL_adreno.so|libshim_adreno.so:/vendor/lib/egl/libGLESv2_adreno.so|libshim_adreno.so:/vendor/lib/egl/libQTapGLES.so|libshim_adreno.so:/vendor/lib/egl/libq3dtools_esx.so|libshim_adreno.so:/vendor/lib64/egl/libEGL_adreno.so|libshim_adreno.so:/vendor/lib64/egl/libGLESv2_adreno.so|libshim_adreno.so:/vendor/lib64/egl/libQTapGLES.so|libshim_adreno.so:/vendor/lib64/egl/libq3dtools_esx.so|libshim_adreno.so
-
 
     mkdir /firmware 0771 system system
     mkdir /persist/data 0700 system system
