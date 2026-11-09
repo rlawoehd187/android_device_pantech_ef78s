@@ -88,3 +88,4 @@ persist.sys.root_access=2
 
 # Camera
 persist.camera.HAL3.enabled=1
+persist.camera.cal.awb=0
