@@ -70,6 +70,14 @@ extract_qc "libra" "$SRC_LIBRA"
 LC_ALL=C sed -i "s/\x00imx258\x00/\x00imx214\x00/; s/\x00ov5670\x00/\x00s5k5e2\x00/" \
     "$CM_ROOT"/vendor/"$VENDOR"/"$DEVICE"/proprietary/vendor/lib/libmmcamera2_sensor_modules.so
 
+# The stock camera libraries are renamed to _stock but keep the SONAME of the
+# shims that load them, so the linker would hand out the stock copy afterwards
+for lib in libactuator_rumba_sa_camcorder libactuator_rumba_sa_camera \
+        libmmcamera_imx214 libmmcamera_rumba_sa_eeprom libmmcamera_s5k5e2; do
+    LC_ALL=C sed -i "s/\x00${lib%?}.\.so\x00/\x00${lib%?}x.so\x00/" \
+        "$CM_ROOT"/vendor/"$VENDOR"/"$DEVICE"/proprietary/vendor/lib/${lib}_stock.so
+done
+
 # The AF core divides by an ROI size that can be 0 on the first open after boot
 Q3A="$CM_ROOT"/vendor/"$VENDOR"/"$DEVICE"/proprietary/vendor/lib/libmmcamera2_q3a_core.so
 printf '\x27\xf0\x38\xbc' | dd of="$Q3A" bs=1 seek=$((0x26f70)) conv=notrunc 2>/dev/null
