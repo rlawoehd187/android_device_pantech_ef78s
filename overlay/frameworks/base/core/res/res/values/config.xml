@@ -238,4 +238,15 @@
     <!-- Disable buttons backlight configurations -->
     <integer name="config_buttonBrightnessSettingDefault">0</integer>
 
+    <!-- A single pulse: the default patterns drive the LRA twice -->
+    <integer-array name="config_longPressVibePattern">
+        <item>0</item>
+        <item>20</item>
+    </integer-array>
+
+    <integer-array name="config_virtualKeyVibePattern">
+        <item>0</item>
+        <item>20</item>
+    </integer-array>
+
 </resources>
