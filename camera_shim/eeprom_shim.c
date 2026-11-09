@@ -27,18 +27,19 @@
 #define STOCK_AF_MACRO 328
 #define STOCK_AF_INFINITY 330
 
-#define SHIM_WB_0 148
-#define SHIM_WB_1 212
-#define SHIM_WB_2 276
 #define SHIM_AF_MACRO 280
 #define SHIM_AF_INFINITY 282
 
+#define WB_FIELDS 3
+#define WB_SLOT 4
 #define SCRATCH_SIZE 0x1000
 #define FUNC_TABLE_SIZE 0x20
 
 typedef void (*format_func)(void *);
 
 static format_func stock_format;
+static format_func stock_whitebalance;
+static char stock_wb_data[WB_FIELDS][sizeof(uint32_t)];
 
 static void shim_get_calibration_items(void *ctrl)
 {
@@ -46,7 +47,7 @@ static void shim_get_calibration_items(void *ctrl)
 
     items[0] = 0;
     items[1] = 1;
-    items[2] = 0; /* The converted white balance data gives a black image */
+    items[2] = 1;
     items[3] = 0;
     items[4] = 0;
 }
@@ -61,15 +62,39 @@ static void shim_format_calibration_data(void *ctrl)
 
     stock_format(scratch);
 
-    memcpy(shim + SHIM_WB_0, scratch + STOCK_WB_0, sizeof(uint32_t));
-    memcpy(shim + SHIM_WB_1, scratch + STOCK_WB_1, sizeof(uint32_t));
-    memcpy(shim + SHIM_WB_2, scratch + STOCK_WB_2, sizeof(uint32_t));
+    memcpy(stock_wb_data[0], scratch + STOCK_WB_0, sizeof(uint32_t));
+    memcpy(stock_wb_data[1], scratch + STOCK_WB_1, sizeof(uint32_t));
+    memcpy(stock_wb_data[2], scratch + STOCK_WB_2, sizeof(uint32_t));
     memcpy(shim + SHIM_AF_MACRO, scratch + STOCK_AF_MACRO, sizeof(uint16_t));
     memcpy(shim + SHIM_AF_INFINITY, scratch + STOCK_AF_INFINITY, sizeof(uint16_t));
 
-    ALOGI("AF macro %u infinity %u",
+    ALOGI("AF macro %u infinity %u, r/g %f b/g %f gr/gb %f",
             *(uint16_t *)(shim + SHIM_AF_MACRO),
-            *(uint16_t *)(shim + SHIM_AF_INFINITY));
+            *(uint16_t *)(shim + SHIM_AF_INFINITY),
+            *(float *)stock_wb_data[0], *(float *)stock_wb_data[1],
+            *(float *)stock_wb_data[2]);
+}
+
+/*
+ * The stock calibration reads the ratios from the stock offsets, which hold
+ * other fields in this structure, so only place them there for the call.
+ */
+static void shim_whitebalance_calibration(void *ctrl)
+{
+    static const size_t offsets[] = { STOCK_WB_0, STOCK_WB_1, STOCK_WB_2 };
+    char *shim = ctrl;
+    char saved[WB_FIELDS][sizeof(uint32_t)];
+    int i;
+
+    for (i = 0; i < WB_FIELDS; i++) {
+        memcpy(saved[i], shim + offsets[i], sizeof(uint32_t));
+        memcpy(shim + offsets[i], stock_wb_data[i], sizeof(uint32_t));
+    }
+
+    stock_whitebalance(ctrl);
+
+    for (i = 0; i < WB_FIELDS; i++)
+        memcpy(shim + offsets[i], saved[i], sizeof(uint32_t));
 }
 
 void *rumba_sa_eeprom_open_lib(void)
@@ -103,6 +128,8 @@ void *rumba_sa_eeprom_open_lib(void)
     memcpy(table, stock_table, FUNC_TABLE_SIZE);
     table[0] = (void *)shim_get_calibration_items;
     table[1] = (void *)shim_format_calibration_data;
+    stock_whitebalance = (format_func)table[WB_SLOT];
+    table[WB_SLOT] = (void *)shim_whitebalance_calibration;
 
     ready = 1;
     return table;
