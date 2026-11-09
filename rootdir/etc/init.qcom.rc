@@ -64,6 +64,10 @@ on boot
     start rmt_storage
     start rfs_access
 
+    # Vibrator intensity
+    chown system system /sys/class/timed_output/vibrator/vtg_level
+    chmod 0644 /sys/class/timed_output/vibrator/vtg_level
+
     write /sys/bus/i2c/devices/2-004a/update_fw 1
     write /sys/bus/i2c/devices/2-004a/update_cfg 1
 
